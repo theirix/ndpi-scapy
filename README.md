@@ -29,23 +29,31 @@ Example for CentOS 7:
     LDFLAGS="-fsanitize=address" ./autogen.sh
   make
   ```
-Please note that full address sanitizer support is not yet in upstream and can be found at author's
-[repository](https://github.com/theirix/nDPI).
 
 2. Download `ndpi-scapy.py` script and launch as root: 
   ```shell
   python ndpi-scapy.py -t 192.168.1.100 -i enp0s3 -b ~/nDPI/example/ndpiReader -o ~/out --max-payload=50
   ```
-Here `-b` parameter points to nDPI example tool, `-o` specifies an output directory where ndpi-scapy.py stores reports
-and `-i` is your network interface. ndpi-scapy was not tested yet with loopback interface.
+  Here `-b` parameter points to nDPI example tool, `-o` specifies an output directory where ndpi-scapy.py stores reports
+  and `-i` is your network interface. ndpi-scapy was not tested yet with loopback interface.
 
-All parameters can be found by launching with `--help` parameter.
-For example, `--restart` specifies an interval after which `ndpiReader` should be restarted.
-Parameters `--min-payload` and `--max-payload` specify a range of body payload.
+  All parameters can be found by launching with `--help` parameter.
+  For example, `--restart` specifies an interval after which `ndpiReader` should be restarted.
+  Parameters `--min-payload` and `--max-payload` specify a range of body payload.
+
+3. Handy way to analyze collected logs is to use
+[asan_symbolize.py](https://github.com/llvm-mirror/compiler-rt/blob/master/lib/asan/scripts/asan_symbolize.py)
+script from the LLVM to mass-demangle stack traces:
+
+  ```shell
+  ls out/*error.log | xargs -L1 ./asan_symbolize.py -l | grep '#0.*nDPI'
+  ```
+
+  It prints all top-level functions where buffer overflows happened.
 
 ## Test launch
 
-```
+```shell
 % python ndpi-scapy.py -t 192.168.1.100 -i enp0s3 -b ~/nDPI/example/ndpiReader -o ~/out --max-payload=50
 [+] starting
 [+] saving logs to: /home/user/out
